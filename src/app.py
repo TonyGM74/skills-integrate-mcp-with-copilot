@@ -45,15 +45,14 @@ def signup_for_activity(activity_name: str, email: str):
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    # Validate student is not already signed up
-    if email in activity["participants"]:
+    # Add student (database handles duplicate check)
+    success = db.add_participant(activity_name, email)
+    if not success:
         raise HTTPException(
             status_code=400,
             detail="Student is already signed up"
         )
-
-    # Add student
-    db.add_participant(activity_name, email)
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -67,13 +66,12 @@ def unregister_from_activity(activity_name: str, email: str):
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    # Validate student is signed up
-    if email not in activity["participants"]:
+    # Remove student (database handles existence check)
+    success = db.remove_participant(activity_name, email)
+    if not success:
         raise HTTPException(
             status_code=400,
             detail="Student is not signed up for this activity"
         )
-
-    # Remove student
-    db.remove_participant(activity_name, email)
+    
     return {"message": f"Unregistered {email} from {activity_name}"}
