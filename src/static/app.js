@@ -3,15 +3,48 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const institutionSelect = document.getElementById("institution-select");
+
+  // Function to fetch institutions from API
+  async function fetchInstitutions() {
+    try {
+      const response = await fetch("/institutions");
+      const institutions = await response.json();
+
+      // Populate institution dropdown
+      Object.entries(institutions).forEach(([id, details]) => {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = details.name;
+        institutionSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching institutions:", error);
+    }
+  }
 
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      const selectedInstitution = institutionSelect.value;
+      const url = selectedInstitution 
+        ? `/activities?institution_id=${encodeURIComponent(selectedInstitution)}`
+        : "/activities";
+      
+      const response = await fetch(url);
       const activities = await response.json();
 
       // Clear loading message
       activitiesList.innerHTML = "";
+
+      // Clear activity select options (except first one)
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+      // Check if there are any activities
+      if (Object.keys(activities).length === 0) {
+        activitiesList.innerHTML = "<p>No activities available for the selected institution.</p>";
+        return;
+      }
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -155,6 +188,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Add event listener to institution selector
+  institutionSelect.addEventListener("change", () => {
+    fetchActivities();
+  });
+
   // Initialize app
+  fetchInstitutions();
   fetchActivities();
 });
