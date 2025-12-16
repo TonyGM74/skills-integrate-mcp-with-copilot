@@ -151,7 +151,8 @@ def get_statistics():
             "participant_count": participant_count,
             "max_participants": max_participants,
             "available_spots": max_participants - participant_count,
-            "occupancy_rate": round(occupancy_rate, 2)
+            "occupancy_rate": round(occupancy_rate, 2),
+            "schedule": details["schedule"]
         })
     
     # Sort by participant count (descending)

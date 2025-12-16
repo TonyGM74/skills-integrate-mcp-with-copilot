@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let participationChart = null;
-  let occupancyChart = null;
-
   // Function to fetch statistics from API
   async function fetchStatistics() {
     try {
@@ -91,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
       bar.className = "bar";
       const percentage = maxValue > 0 ? (data[index] / maxValue) * 100 : 0;
       bar.style.width = percentage + "%";
-      bar.style.backgroundColor = "#1a237e";
 
       const barValue = document.createElement("span");
       barValue.className = "bar-value";
@@ -178,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${activity.max_participants}</td>
         <td>${activity.available_spots}</td>
         <td>${activity.occupancy_rate}%</td>
-        <td>${getScheduleFromActivity(activity.name)}</td>
+        <td>${activity.schedule || "N/A"}</td>
       `;
 
       tableBody.appendChild(row);
@@ -213,22 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       detailsContainer.appendChild(activityDiv);
     });
-  }
-
-  // Helper function to get schedule (would normally come from API)
-  function getScheduleFromActivity(activityName) {
-    const schedules = {
-      "Chess Club": "Fridays, 3:30 PM - 5:00 PM",
-      "Programming Class": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
-      "Gym Class": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
-      "Soccer Team": "Tuesdays and Thursdays, 4:00 PM - 5:30 PM",
-      "Basketball Team": "Wednesdays and Fridays, 3:30 PM - 5:00 PM",
-      "Art Club": "Thursdays, 3:30 PM - 5:00 PM",
-      "Drama Club": "Mondays and Wednesdays, 4:00 PM - 5:30 PM",
-      "Math Club": "Tuesdays, 3:30 PM - 4:30 PM",
-      "Debate Team": "Fridays, 4:00 PM - 5:30 PM",
-    };
-    return schedules[activityName] || "N/A";
   }
 
   // Initialize the reports page
