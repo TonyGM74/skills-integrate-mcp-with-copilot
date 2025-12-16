@@ -141,7 +141,8 @@ section h3 {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -342,11 +343,6 @@ footer {
 }
 
 .admin-form-container textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
   min-height: 80px;
   resize: vertical;
   font-family: Arial, sans-serif;

@@ -197,7 +197,7 @@ def update_activity(activity_name: str, description: str = None, schedule: str =
         if max_participants < len(activity["participants"]):
             raise HTTPException(
                 status_code=400, 
-                detail=f"Cannot reduce capacity below current participants ({len(activity['participants'])})"
+                detail=f"Cannot reduce capacity below current participants. Minimum allowed: {len(activity['participants'])}"
             )
         activity["max_participants"] = max_participants
     

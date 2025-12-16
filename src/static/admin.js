@@ -186,17 +186,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // Prompt for new values
     const newDescription = prompt("Enter new description:", activity.description);
     const newSchedule = prompt("Enter new schedule:", activity.schedule);
-    const newCapacity = prompt("Enter new max participants:", activity.max_participants);
+    const newCapacityStr = prompt("Enter new max participants:", activity.max_participants);
 
-    if (newDescription === null && newSchedule === null && newCapacity === null) {
+    if (newDescription === null && newSchedule === null && newCapacityStr === null) {
       return; // User cancelled
+    }
+
+    // Validate capacity if provided
+    let newCapacity = null;
+    if (newCapacityStr !== null && newCapacityStr !== "") {
+      newCapacity = parseInt(newCapacityStr, 10);
+      if (isNaN(newCapacity) || newCapacity < 1) {
+        showMessage("Max participants must be a positive number", "error");
+        return;
+      }
     }
 
     try {
       const params = new URLSearchParams();
       if (newDescription !== null && newDescription !== "") params.append("description", newDescription);
       if (newSchedule !== null && newSchedule !== "") params.append("schedule", newSchedule);
-      if (newCapacity !== null && newCapacity !== "") params.append("max_participants", newCapacity);
+      if (newCapacity !== null) params.append("max_participants", newCapacity);
 
       const updateResponse = await fetch(
         `/admin/activities/${encodeURIComponent(activityName)}?${params.toString()}`,
