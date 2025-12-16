@@ -8,6 +8,8 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional
 import os
 from pathlib import Path
 
@@ -18,6 +20,36 @@ app = FastAPI(title="Mergington High School API",
 current_dir = Path(__file__).parent
 app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
+
+
+# Pydantic models for request validation
+class ActivityCreate(BaseModel):
+    """Model for creating a new activity"""
+    name: str = Field(..., min_length=1, max_length=100, description="Name of the activity")
+    description: str = Field(..., min_length=1, max_length=500, description="Description of the activity")
+    schedule: str = Field(..., min_length=1, max_length=200, description="Schedule of the activity")
+    max_participants: int = Field(..., gt=0, le=100, description="Maximum number of participants")
+    
+    @field_validator('name', 'description', 'schedule')
+    @classmethod
+    def validate_not_empty(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError('Field cannot be empty or whitespace only')
+        return v.strip()
+
+
+class ActivityUpdate(BaseModel):
+    """Model for updating an existing activity"""
+    description: Optional[str] = Field(None, min_length=1, max_length=500, description="Description of the activity")
+    schedule: Optional[str] = Field(None, min_length=1, max_length=200, description="Schedule of the activity")
+    max_participants: Optional[int] = Field(None, gt=0, le=100, description="Maximum number of participants")
+    
+    @field_validator('description', 'schedule')
+    @classmethod
+    def validate_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and (not v or not v.strip()):
+            raise ValueError('Field cannot be empty or whitespace only')
+        return v.strip() if v else v
 
 # In-memory activity database
 activities = {
@@ -130,3 +162,73 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+# Admin endpoints for managing activities
+@app.post("/admin/activities")
+def create_activity(activity: ActivityCreate):
+    """Create a new activity (admin only)"""
+    # Validate activity doesn't already exist
+    if activity.name in activities:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Activity '{activity.name}' already exists"
+        )
+    
+    # Create the new activity
+    activities[activity.name] = {
+        "description": activity.description,
+        "schedule": activity.schedule,
+        "max_participants": activity.max_participants,
+        "participants": []
+    }
+    
+    return {
+        "message": f"Activity '{activity.name}' created successfully",
+        "activity": activities[activity.name]
+    }
+
+
+@app.put("/admin/activities/{activity_name}")
+def update_activity(activity_name: str, activity: ActivityUpdate):
+    """Update an existing activity (admin only)"""
+    # Validate activity exists
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    # Update only provided fields
+    current_activity = activities[activity_name]
+    if activity.description is not None:
+        current_activity["description"] = activity.description
+    if activity.schedule is not None:
+        current_activity["schedule"] = activity.schedule
+    if activity.max_participants is not None:
+        # Validate new max doesn't conflict with current participants
+        if activity.max_participants < len(current_activity["participants"]):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot set max_participants to {activity.max_participants}. "
+                       f"There are already {len(current_activity['participants'])} participants."
+            )
+        current_activity["max_participants"] = activity.max_participants
+    
+    return {
+        "message": f"Activity '{activity_name}' updated successfully",
+        "activity": current_activity
+    }
+
+
+@app.delete("/admin/activities/{activity_name}")
+def delete_activity(activity_name: str):
+    """Delete an activity (admin only)"""
+    # Validate activity exists
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    # Remove the activity
+    deleted_activity = activities.pop(activity_name)
+    
+    return {
+        "message": f"Activity '{activity_name}' deleted successfully",
+        "deleted_activity": deleted_activity
+    }
