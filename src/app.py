@@ -105,6 +105,13 @@ def signup_for_activity(activity_name: str, email: str):
             detail="Student is already signed up"
         )
 
+    # Validate activity has not reached maximum capacity
+    if len(activity["participants"]) >= activity["max_participants"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Activity has reached maximum capacity"
+        )
+
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
@@ -130,3 +137,117 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+# Admin endpoints
+@app.get("/admin/dashboard")
+def get_admin_dashboard():
+    """Get dashboard statistics"""
+    total_activities = len(activities)
+    total_participants = sum(len(activity["participants"]) for activity in activities.values())
+    unique_participants = len(set(email for activity in activities.values() for email in activity["participants"]))
+    
+    # Calculate participation rate
+    total_capacity = sum(activity["max_participants"] for activity in activities.values())
+    participation_rate = (total_participants / total_capacity * 100) if total_capacity > 0 else 0
+    
+    # Get most popular activities
+    activity_stats = [
+        {
+            "name": name,
+            "participants": len(details["participants"]),
+            "capacity": details["max_participants"],
+            "occupancy_rate": (len(details["participants"]) / details["max_participants"] * 100) if details["max_participants"] > 0 else 0
+        }
+        for name, details in activities.items()
+    ]
+    activity_stats.sort(key=lambda x: x["participants"], reverse=True)
+    
+    return {
+        "total_activities": total_activities,
+        "total_participants": total_participants,
+        "unique_participants": unique_participants,
+        "participation_rate": round(participation_rate, 2),
+        "activity_stats": activity_stats
+    }
+
+
+@app.post("/admin/activities")
+def create_activity(name: str, description: str, schedule: str, max_participants: int):
+    """Create a new activity"""
+    if name in activities:
+        raise HTTPException(status_code=400, detail="Activity already exists")
+    
+    if max_participants <= 0:
+        raise HTTPException(status_code=400, detail="Max participants must be greater than 0")
+    
+    activities[name] = {
+        "description": description,
+        "schedule": schedule,
+        "max_participants": max_participants,
+        "participants": []
+    }
+    
+    return {"message": f"Activity '{name}' created successfully"}
+
+
+@app.put("/admin/activities/{activity_name}")
+def update_activity(activity_name: str, description: str = None, schedule: str = None, max_participants: int = None):
+    """Update an existing activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    activity = activities[activity_name]
+    
+    if description is not None:
+        activity["description"] = description
+    if schedule is not None:
+        activity["schedule"] = schedule
+    if max_participants is not None:
+        if max_participants <= 0:
+            raise HTTPException(status_code=400, detail="Max participants must be greater than 0")
+        if max_participants < len(activity["participants"]):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot reduce max participants below current participant count ({len(activity['participants'])})"
+            )
+        activity["max_participants"] = max_participants
+    
+    return {"message": f"Activity '{activity_name}' updated successfully"}
+
+
+@app.delete("/admin/activities/{activity_name}")
+def delete_activity(activity_name: str):
+    """Delete an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    del activities[activity_name]
+    return {"message": f"Activity '{activity_name}' deleted successfully"}
+
+
+@app.get("/admin/participants")
+def get_all_participants():
+    """Get all participants with their activities"""
+    participant_activities = {}
+    
+    for activity_name, activity in activities.items():
+        for email in activity["participants"]:
+            if email not in participant_activities:
+                participant_activities[email] = []
+            participant_activities[email].append(activity_name)
+    
+    # Convert to list format
+    participants_list = [
+        {
+            "email": email,
+            "activities": activities_list,
+            "activity_count": len(activities_list)
+        }
+        for email, activities_list in participant_activities.items()
+    ]
+    
+    # Sort by activity count (most active first)
+    participants_list.sort(key=lambda x: x["activity_count"], reverse=True)
+    
+    return participants_list
