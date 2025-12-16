@@ -27,9 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fetchActivities() {
     try {
       const selectedInstitution = institutionSelect.value;
-      const url = selectedInstitution 
-        ? `/activities?institution_id=${encodeURIComponent(selectedInstitution)}`
-        : "/activities";
+      const params = new URLSearchParams();
+      if (selectedInstitution) {
+        params.append('institution_id', selectedInstitution);
+      }
+      const url = `/activities${params.toString() ? '?' + params.toString() : ''}`;
       
       const response = await fetch(url);
       const activities = await response.json();
@@ -193,7 +195,11 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchActivities();
   });
 
-  // Initialize app
-  fetchInstitutions();
-  fetchActivities();
+  // Initialize app - fetch institutions first, then activities
+  async function initialize() {
+    await fetchInstitutions();
+    await fetchActivities();
+  }
+  
+  initialize();
 });

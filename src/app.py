@@ -5,6 +5,7 @@ A FastAPI application that allows students to view and sign up
 for extracurricular activities across multiple educational institutions.
 """
 
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -146,9 +147,13 @@ def get_institutions():
 
 
 @app.get("/activities")
-def get_activities(institution_id: str = None):
+def get_activities(institution_id: Optional[str] = None):
     """Get all activities, optionally filtered by institution"""
     if institution_id:
+        # Validate institution exists
+        if institution_id not in institutions:
+            raise HTTPException(status_code=404, detail="Institution not found")
+        
         # Filter activities by institution
         filtered = {
             name: details for name, details in activities.items()
