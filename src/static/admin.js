@@ -5,6 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeModal = document.querySelector(".close-modal");
   const activityForm = document.getElementById("activity-form");
 
+  // Occupancy thresholds for color coding
+  const OCCUPANCY_LOW = 50;
+  const OCCUPANCY_MEDIUM = 80;
+  const COLOR_LOW = "#4caf50";
+  const COLOR_MEDIUM = "#ff9800";
+  const COLOR_HIGH = "#f44336";
+
   // Tab switching
   document.querySelectorAll(".tab-button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -288,7 +295,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const occupancyRate = stat.occupancy_rate.toFixed(1);
         const color =
-          occupancyRate < 50 ? "#4caf50" : occupancyRate < 80 ? "#ff9800" : "#f44336";
+          occupancyRate < OCCUPANCY_LOW ? COLOR_LOW : 
+          occupancyRate < OCCUPANCY_MEDIUM ? COLOR_MEDIUM : 
+          COLOR_HIGH;
 
         statCard.innerHTML = `
           <h4 style="margin-bottom: 10px; color: #1a237e;">${stat.name}</h4>
