@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 
 # Security configuration
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = os.getenv("SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -270,8 +270,7 @@ def get_activities(current_user: User = Depends(get_current_user)):
 
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(
-    activity_name: str, 
-    email: str,
+    activity_name: str,
     current_user: User = Depends(require_role(["student"]))
 ):
     """Sign up a student for an activity - student only"""
@@ -281,6 +280,9 @@ def signup_for_activity(
 
     # Get the specific activity
     activity = activities[activity_name]
+
+    # Use current user's email
+    email = current_user.email
 
     # Validate student is not already signed up
     if email in activity["participants"]:
@@ -296,8 +298,7 @@ def signup_for_activity(
 
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_from_activity(
-    activity_name: str, 
-    email: str,
+    activity_name: str,
     current_user: User = Depends(require_role(["student"]))
 ):
     """Unregister a student from an activity - student only"""
@@ -307,6 +308,9 @@ def unregister_from_activity(
 
     # Get the specific activity
     activity = activities[activity_name]
+
+    # Use current user's email
+    email = current_user.email
 
     # Validate student is signed up
     if email not in activity["participants"]:

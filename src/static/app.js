@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const spotsLeft =
           details.max_participants - details.participants.length;
 
-        // Create participants HTML with delete icons instead of bullet points
+        // Create participants HTML with delete icons only for current user
         const participantsHTML =
           details.participants.length > 0
             ? `<div class="participants-section">
@@ -64,8 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
               <ul class="participants-list">
                 ${details.participants
                   .map(
-                    (email) =>
-                      `<li><span class="participant-email">${email}</span><button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button></li>`
+                    (email) => {
+                      const deleteBtn = email === user.email 
+                        ? `<button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button>`
+                        : '';
+                      return `<li><span class="participant-email">${email}</span>${deleteBtn}</li>`;
+                    }
                   )
                   .join("")}
               </ul>
@@ -106,13 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleUnregister(event) {
     const button = event.target;
     const activity = button.getAttribute("data-activity");
-    const email = button.getAttribute("data-email");
 
     try {
       const response = await fetch(
-        `/activities/${encodeURIComponent(
-          activity
-        )}/unregister?email=${encodeURIComponent(email)}`,
+        `/activities/${encodeURIComponent(activity)}/unregister`,
         {
           method: "DELETE",
           headers: {
@@ -152,14 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const email = document.getElementById("email").value;
     const activity = document.getElementById("activity").value;
 
     try {
       const response = await fetch(
-        `/activities/${encodeURIComponent(
-          activity
-        )}/signup?email=${encodeURIComponent(email)}`,
+        `/activities/${encodeURIComponent(activity)}/signup`,
         {
           method: "POST",
           headers: {
