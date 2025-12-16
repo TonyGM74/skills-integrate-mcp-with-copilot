@@ -198,3 +198,213 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+/* Navigation styles */
+.header-nav {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.header-nav a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.header-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.header-nav a.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+
+/* Club card styles */
+.club-card {
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.club-card h4 {
+  margin-bottom: 10px;
+  color: #0066cc;
+}
+
+.club-card p {
+  margin-bottom: 8px;
+}
+
+.club-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.club-actions button {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.btn-view {
+  background-color: #1a237e;
+}
+
+.btn-view:hover {
+  background-color: #3949ab;
+}
+
+.btn-edit {
+  background-color: #0277bd;
+}
+
+.btn-edit:hover {
+  background-color: #039be5;
+}
+
+.btn-delete {
+  background-color: #c62828;
+}
+
+.btn-delete:hover {
+  background-color: #e53935;
+}
+
+/* Modal styles */
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close,
+.close-edit,
+.close-member,
+.close-event {
+  color: #aaa;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close-edit:hover,
+.close-member:hover,
+.close-event:hover {
+  color: #000;
+}
+
+/* Club details styles */
+#club-details h2 {
+  margin-bottom: 15px;
+  color: #1a237e;
+}
+
+.detail-section {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #1a237e;
+}
+
+.btn-add-member,
+.btn-add-event {
+  background-color: #2e7d32;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.btn-add-member:hover,
+.btn-add-event:hover {
+  background-color: #43a047;
+}
+
+.members-list,
+.events-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.members-list li,
+.events-list li {
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.events-list li {
+  align-items: flex-start;
+}
+
+.event-info {
+  flex: 1;
+}
+
+.event-info strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #1a237e;
+}
+
+.event-info p {
+  margin: 3px 0;
+  font-size: 14px;
+}
+
+/* Textarea styles */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  resize: vertical;
+}
