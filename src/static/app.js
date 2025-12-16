@@ -7,6 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const notificationEmailInput = document.getElementById("notification-email");
   const loadNotificationsBtn = document.getElementById("load-notifications-btn");
 
+  // Helper function to escape HTML to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   // Function to fetch and display notifications
   async function fetchNotifications() {
     const email = notificationEmailInput.value.trim();
@@ -38,10 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         notificationCard.innerHTML = `
           <div class="notification-content">
-            <p class="notification-message">${notification.message}</p>
-            <p class="notification-timestamp">${timestamp}</p>
+            <p class="notification-message">${escapeHtml(notification.message)}</p>
+            <p class="notification-timestamp">${escapeHtml(timestamp)}</p>
           </div>
-          ${!notification.read ? `<button class="mark-read-btn" data-id="${notification.id}" data-email="${email}">Mark as Read</button>` : '<span class="read-badge">Read</span>'}
+          ${!notification.read ? `<button class="mark-read-btn" data-id="${notification.id}" data-email="${escapeHtml(email)}">Mark as Read</button>` : '<span class="read-badge">Read</span>'}
         `;
         
         notificationsList.appendChild(notificationCard);
