@@ -10,11 +10,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from datetime import datetime
 from typing import Optional
+from pydantic import BaseModel
 import os
 from pathlib import Path
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
+
+# Pydantic models for request validation
+class AnnouncementRequest(BaseModel):
+    activity_name: str
+    message: str
 
 # Mount the static files directory
 current_dir = Path(__file__).parent
@@ -119,13 +125,13 @@ def get_notifications(activity_name: Optional[str] = None):
 
 
 @app.post("/notifications")
-def create_announcement(activity_name: str, message: str):
+def create_announcement(request: AnnouncementRequest):
     """Create a new announcement notification"""
     # Validate activity exists
-    if activity_name not in activities:
+    if request.activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
     
-    notification = create_notification(activity_name, message, "announcement")
+    notification = create_notification(request.activity_name, request.message, "announcement")
     return {"message": "Announcement created", "notification": notification}
 
 

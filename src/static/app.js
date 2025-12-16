@@ -230,12 +230,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const message = document.getElementById("announcement-message").value;
 
     try {
-      const response = await fetch(
-        `/notifications?activity_name=${encodeURIComponent(activity)}&message=${encodeURIComponent(message)}`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch("/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          activity_name: activity,
+          message: message,
+        }),
+      });
 
       const result = await response.json();
 
