@@ -88,11 +88,12 @@ activities = {
 # In-memory notifications database
 notifications = []
 notification_id_counter = 1
+MAX_NOTIFICATIONS = 100  # Limit to prevent unbounded growth
 
 
 def create_notification(activity_name: str, message: str, notification_type: str = "info"):
     """Helper function to create a notification"""
-    global notification_id_counter
+    global notification_id_counter, notifications
     notification = {
         "id": notification_id_counter,
         "activity_name": activity_name,
@@ -102,6 +103,11 @@ def create_notification(activity_name: str, message: str, notification_type: str
     }
     notifications.append(notification)
     notification_id_counter += 1
+    
+    # Keep only the latest MAX_NOTIFICATIONS to prevent memory issues
+    if len(notifications) > MAX_NOTIFICATIONS:
+        notifications = notifications[-MAX_NOTIFICATIONS:]
+    
     return notification
 
 

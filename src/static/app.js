@@ -32,14 +32,29 @@ document.addEventListener("DOMContentLoaded", () => {
         const timestamp = new Date(notification.timestamp).toLocaleString();
         const icon = getNotificationIcon(notification.type);
         
-        notificationCard.innerHTML = `
-          <span class="notification-icon">${icon}</span>
-          <div class="notification-content">
-            <strong>${notification.activity_name}</strong>
-            <p>${notification.message}</p>
-            <small>${timestamp}</small>
-          </div>
-        `;
+        // Create elements safely to prevent XSS
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'notification-icon';
+        iconSpan.textContent = icon;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'notification-content';
+        
+        const activityStrong = document.createElement('strong');
+        activityStrong.textContent = notification.activity_name;
+        
+        const messagePara = document.createElement('p');
+        messagePara.textContent = notification.message;
+        
+        const timestampSmall = document.createElement('small');
+        timestampSmall.textContent = timestamp;
+        
+        contentDiv.appendChild(activityStrong);
+        contentDiv.appendChild(messagePara);
+        contentDiv.appendChild(timestampSmall);
+        
+        notificationCard.appendChild(iconSpan);
+        notificationCard.appendChild(contentDiv);
         
         notificationsList.appendChild(notificationCard);
       });
