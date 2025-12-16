@@ -3,6 +3,9 @@ High School Management System API
 
 A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
+
+All activity and participant data is stored in-memory without any persistent
+database. Data will be reset when the server restarts.
 """
 
 from fastapi import FastAPI, HTTPException
@@ -20,6 +23,8 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
 
 # In-memory activity database
+# Note: All data is stored in memory and will be lost when the server restarts.
+# This is intentional - no persistent database is used.
 activities = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
@@ -103,6 +108,13 @@ def signup_for_activity(activity_name: str, email: str):
         raise HTTPException(
             status_code=400,
             detail="Student is already signed up"
+        )
+
+    # Validate activity is not full
+    if len(activity["participants"]) >= activity["max_participants"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Activity is full"
         )
 
     # Add student
