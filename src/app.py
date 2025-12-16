@@ -5,11 +5,12 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
 from pathlib import Path
+from typing import Optional
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -25,55 +26,73 @@ activities = {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
         "max_participants": 12,
-        "participants": ["michael@mergington.edu", "daniel@mergington.edu"]
+        "participants": ["michael@mergington.edu", "daniel@mergington.edu"],
+        "category": "Academic",
+        "start_date": "2024-01-15"
     },
     "Programming Class": {
         "description": "Learn programming fundamentals and build software projects",
         "schedule": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
         "max_participants": 20,
-        "participants": ["emma@mergington.edu", "sophia@mergington.edu"]
+        "participants": ["emma@mergington.edu", "sophia@mergington.edu"],
+        "category": "Academic",
+        "start_date": "2024-01-10"
     },
     "Gym Class": {
         "description": "Physical education and sports activities",
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
-        "participants": ["john@mergington.edu", "olivia@mergington.edu"]
+        "participants": ["john@mergington.edu", "olivia@mergington.edu"],
+        "category": "Sports",
+        "start_date": "2024-01-08"
     },
     "Soccer Team": {
         "description": "Join the school soccer team and compete in matches",
         "schedule": "Tuesdays and Thursdays, 4:00 PM - 5:30 PM",
         "max_participants": 22,
-        "participants": ["liam@mergington.edu", "noah@mergington.edu"]
+        "participants": ["liam@mergington.edu", "noah@mergington.edu"],
+        "category": "Sports",
+        "start_date": "2024-01-12"
     },
     "Basketball Team": {
         "description": "Practice and play basketball with the school team",
         "schedule": "Wednesdays and Fridays, 3:30 PM - 5:00 PM",
         "max_participants": 15,
-        "participants": ["ava@mergington.edu", "mia@mergington.edu"]
+        "participants": ["ava@mergington.edu", "mia@mergington.edu"],
+        "category": "Sports",
+        "start_date": "2024-01-20"
     },
     "Art Club": {
         "description": "Explore your creativity through painting and drawing",
         "schedule": "Thursdays, 3:30 PM - 5:00 PM",
         "max_participants": 15,
-        "participants": ["amelia@mergington.edu", "harper@mergington.edu"]
+        "participants": ["amelia@mergington.edu", "harper@mergington.edu"],
+        "category": "Arts",
+        "start_date": "2024-01-18"
     },
     "Drama Club": {
         "description": "Act, direct, and produce plays and performances",
         "schedule": "Mondays and Wednesdays, 4:00 PM - 5:30 PM",
         "max_participants": 20,
-        "participants": ["ella@mergington.edu", "scarlett@mergington.edu"]
+        "participants": ["ella@mergington.edu", "scarlett@mergington.edu"],
+        "category": "Arts",
+        "start_date": "2024-01-22"
     },
     "Math Club": {
         "description": "Solve challenging problems and participate in math competitions",
         "schedule": "Tuesdays, 3:30 PM - 4:30 PM",
         "max_participants": 10,
-        "participants": ["james@mergington.edu", "benjamin@mergington.edu"]
+        "participants": ["james@mergington.edu", "benjamin@mergington.edu"],
+        "category": "Academic",
+        "start_date": "2024-01-16"
     },
     "Debate Team": {
         "description": "Develop public speaking and argumentation skills",
         "schedule": "Fridays, 4:00 PM - 5:30 PM",
         "max_participants": 12,
-        "participants": ["charlotte@mergington.edu", "henry@mergington.edu"]
+        "participants": ["charlotte@mergington.edu", "henry@mergington.edu"],
+        "category": "Academic",
+        "start_date": "2024-01-25"
     }
 }
 
@@ -84,8 +103,61 @@ def root():
 
 
 @app.get("/activities")
-def get_activities():
-    return activities
+def get_activities(
+    search: Optional[str] = Query(None, description="Search activities by name"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    start_date: Optional[str] = Query(None, description="Filter by start date"),
+    sort_by: Optional[str] = Query("name", description="Sort by: name, date, or participants")
+):
+    """Get all activities with optional search, filter, and sort"""
+    # Start with all activities
+    filtered_activities = dict(activities)
+    
+    # Apply search filter (case-insensitive)
+    if search:
+        search_lower = search.lower()
+        filtered_activities = {
+            name: details
+            for name, details in filtered_activities.items()
+            if search_lower in name.lower()
+        }
+    
+    # Apply category filter
+    if category:
+        filtered_activities = {
+            name: details
+            for name, details in filtered_activities.items()
+            if details.get("category", "").lower() == category.lower()
+        }
+    
+    # Apply date filter
+    if start_date:
+        filtered_activities = {
+            name: details
+            for name, details in filtered_activities.items()
+            if details.get("start_date") == start_date
+        }
+    
+    # Sort activities
+    if sort_by == "date":
+        # Sort by start_date
+        sorted_items = sorted(
+            filtered_activities.items(),
+            key=lambda x: x[1].get("start_date", "")
+        )
+    elif sort_by == "participants":
+        # Sort by number of participants (descending)
+        sorted_items = sorted(
+            filtered_activities.items(),
+            key=lambda x: len(x[1].get("participants", [])),
+            reverse=True
+        )
+    else:  # Default to name
+        # Sort by name (alphabetically)
+        sorted_items = sorted(filtered_activities.items())
+    
+    # Convert back to dictionary
+    return dict(sorted_items)
 
 
 @app.post("/activities/{activity_name}/signup")

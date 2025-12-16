@@ -3,15 +3,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  
+  // Get filter elements
+  const searchInput = document.getElementById("search-input");
+  const categoryFilter = document.getElementById("category-filter");
+  const dateFilter = document.getElementById("date-filter");
+  const sortSelect = document.getElementById("sort-select");
+  const clearFiltersBtn = document.getElementById("clear-filters");
 
-  // Function to fetch activities from API
+  // Function to fetch activities from API with filters
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      // Build query parameters
+      const params = new URLSearchParams();
+      
+      const searchValue = searchInput.value.trim();
+      const categoryValue = categoryFilter.value;
+      const dateValue = dateFilter.value;
+      const sortValue = sortSelect.value;
+      
+      if (searchValue) params.append("search", searchValue);
+      if (categoryValue) params.append("category", categoryValue);
+      if (dateValue) params.append("start_date", dateValue);
+      if (sortValue) params.append("sort_by", sortValue);
+      
+      const url = `/activities${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
       const activities = await response.json();
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      
+      // Check if no activities found
+      if (Object.keys(activities).length === 0) {
+        activitiesList.innerHTML = "<p class='no-results'>No activities found matching your criteria.</p>";
+        activitySelect.innerHTML = '<option value="">-- No activities available --</option>';
+        return;
+      }
+
+      // Clear and reset activity select dropdown
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -40,7 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
+          <p><strong>Category:</strong> ${details.category || 'N/A'}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
+          <p><strong>Start Date:</strong> ${details.start_date || 'N/A'}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
           <div class="participants-container">
             ${participantsHTML}
@@ -153,6 +186,21 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
     }
+  });
+
+  // Add event listeners for filter controls
+  searchInput.addEventListener("input", fetchActivities);
+  categoryFilter.addEventListener("change", fetchActivities);
+  dateFilter.addEventListener("change", fetchActivities);
+  sortSelect.addEventListener("change", fetchActivities);
+  
+  // Clear filters button
+  clearFiltersBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    categoryFilter.value = "";
+    dateFilter.value = "";
+    sortSelect.value = "name";
+    fetchActivities();
   });
 
   // Initialize app
