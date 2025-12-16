@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "";
       
       // Check if no activities found
-      if (Object.keys(activities).length === 0) {
+      if (!activities || Object.keys(activities).length === 0) {
         activitiesList.innerHTML = "<p class='no-results'>No activities found matching your criteria.</p>";
         activitySelect.innerHTML = '<option value="">-- No activities available --</option>';
         return;
