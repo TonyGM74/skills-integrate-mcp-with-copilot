@@ -243,6 +243,10 @@ def approve_membership_request(activity_name: str, email: str):
     if email in activity["participants"]:
         raise HTTPException(status_code=400, detail="Student is already a member")
 
+    # Check if activity has available spots
+    if len(activity["participants"]) >= activity["max_participants"]:
+        raise HTTPException(status_code=400, detail="Activity is full, no spots available")
+
     # Approve request: add to participants and mark as approved
     activity["participants"].append(email)
     
