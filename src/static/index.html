@@ -3,16 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mergington High School Activities</title>
+    <title>Multi-Institution Activities Platform</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
-      <h1>Mergington High School</h1>
-      <h2>Extracurricular Activities</h2>
+      <h1>Multi-Institution Activities Platform</h1>
+      <h2>Extracurricular Activities Management</h2>
     </header>
 
     <main>
+      <section id="institution-selector">
+        <h3>Select Your Institution</h3>
+        <div class="form-group">
+          <label for="institution-select">Choose Institution:</label>
+          <select id="institution-select" required>
+            <option value="">-- All Institutions --</option>
+            <!-- Institution options will be loaded here -->
+          </select>
+        </div>
+      </section>
+
       <section id="activities-container">
         <h3>Available Activities</h3>
         <div id="activities-list">
@@ -42,7 +53,7 @@
     </main>
 
     <footer>
-      <p>&copy; 2023 Mergington High School</p>
+      <p>&copy; 2023 Multi-Institution Activities Platform</p>
     </footer>
 
     <script src="app.js"></script>
