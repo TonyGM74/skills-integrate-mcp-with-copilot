@@ -192,7 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateData = {};
     if (description) updateData.description = description;
     if (schedule) updateData.schedule = schedule;
-    if (maxParticipants) updateData.max_participants = parseInt(maxParticipants);
+    if (maxParticipants !== '') {
+      const parsedMax = parseInt(maxParticipants);
+      if (!isNaN(parsedMax) && parsedMax > 0) {
+        updateData.max_participants = parsedMax;
+      }
+    }
 
     if (Object.keys(updateData).length === 0) {
       showMessage(editMessage, "No changes to save", "info");
