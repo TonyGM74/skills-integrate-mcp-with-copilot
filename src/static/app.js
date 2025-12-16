@@ -18,8 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
-        const spotsLeft =
-          details.max_participants - details.participants.length;
+        const currentParticipants = details.participants.length;
+        const maxParticipants = details.max_participants;
+        const spotsLeft = maxParticipants - currentParticipants;
 
         // Create participants HTML with delete icons instead of bullet points
         const participantsHTML =
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Capacity:</strong> ${currentParticipants}/${maxParticipants} participants (${spotsLeft} spots left)</p>
           <div class="participants-container">
             ${participantsHTML}
           </div>
