@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistics and Reports - Mergington High School</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Mergington High School</h1>
+      <h2>Statistics and Reports</h2>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link">← Back to Activities</a>
+      </nav>
+    </header>
+
+    <main class="reports-main">
+      <!-- Summary Statistics Section -->
+      <section id="summary-section">
+        <h3>Summary Statistics</h3>
+        <div id="summary-stats" class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-activities">-</div>
+            <div class="stat-label">Total Activities</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-participants">-</div>
+            <div class="stat-label">Total Participants</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-capacity">-</div>
+            <div class="stat-label">Total Capacity</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="occupancy-rate">-</div>
+            <div class="stat-label">Overall Occupancy Rate</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section id="charts-section">
+        <h3>Visual Analytics</h3>
+        <div class="charts-container">
+          <div class="chart-wrapper">
+            <h4>Participation by Activity</h4>
+            <div id="participationChart" class="bar-chart-container"></div>
+          </div>
+          <div class="chart-wrapper">
+            <h4>Occupancy Rates</h4>
+            <div id="occupancyChart" class="bar-chart-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Detailed Reports Table -->
+      <section id="reports-section">
+        <h3>Detailed Activity Reports</h3>
+        <div id="reports-table-container">
+          <table id="reports-table">
+            <thead>
+              <tr>
+                <th>Activity Name</th>
+                <th>Participants</th>
+                <th>Capacity</th>
+                <th>Available Spots</th>
+                <th>Occupancy Rate</th>
+                <th>Schedule</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-body">
+              <tr>
+                <td colspan="6">Loading reports...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Participants Details -->
+      <section id="participants-section">
+        <h3>Participants by Activity</h3>
+        <div id="participants-details">
+          <p>Loading participant details...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2023 Mergington High School</p>
+    </footer>
+
+    <script src="reports.js"></script>
+  </body>
+</html>

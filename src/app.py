@@ -130,3 +130,60 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+@app.get("/statistics")
+def get_statistics():
+    """Get participation statistics for all activities"""
+    total_activities = len(activities)
+    total_participants = sum(len(activity["participants"]) for activity in activities.values())
+    total_capacity = sum(activity["max_participants"] for activity in activities.values())
+    
+    # Calculate per-activity statistics
+    activity_stats = []
+    for name, details in activities.items():
+        participant_count = len(details["participants"])
+        max_participants = details["max_participants"]
+        occupancy_rate = (participant_count / max_participants * 100) if max_participants > 0 else 0
+        
+        activity_stats.append({
+            "name": name,
+            "participant_count": participant_count,
+            "max_participants": max_participants,
+            "available_spots": max_participants - participant_count,
+            "occupancy_rate": round(occupancy_rate, 2)
+        })
+    
+    # Sort by participant count (descending)
+    activity_stats.sort(key=lambda x: x["participant_count"], reverse=True)
+    
+    return {
+        "summary": {
+            "total_activities": total_activities,
+            "total_participants": total_participants,
+            "total_capacity": total_capacity,
+            "overall_occupancy_rate": round((total_participants / total_capacity * 100) if total_capacity > 0 else 0, 2)
+        },
+        "activities": activity_stats
+    }
+
+
+@app.get("/reports")
+def get_reports():
+    """Get detailed reports for activities"""
+    reports = []
+    
+    for name, details in activities.items():
+        participant_count = len(details["participants"])
+        
+        reports.append({
+            "activity_name": name,
+            "description": details["description"],
+            "schedule": details["schedule"],
+            "participants": details["participants"],
+            "participant_count": participant_count,
+            "max_participants": details["max_participants"],
+            "available_spots": details["max_participants"] - participant_count
+        })
+    
+    return reports
