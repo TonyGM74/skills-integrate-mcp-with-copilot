@@ -8,6 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from datetime import datetime
 import os
 from pathlib import Path
 
@@ -77,6 +78,31 @@ activities = {
     }
 }
 
+# In-memory notifications database
+# Structure: { "email": [{"id": str, "message": str, "timestamp": str, "read": bool, "type": str}] }
+notifications = {}
+notification_counter = 0
+
+
+def create_notification(email: str, message: str, notification_type: str = "info"):
+    """Create a notification for a user"""
+    global notification_counter
+    notification_counter += 1
+    
+    if email not in notifications:
+        notifications[email] = []
+    
+    notification = {
+        "id": notification_counter,
+        "message": message,
+        "timestamp": datetime.now().isoformat(),
+        "read": False,
+        "type": notification_type
+    }
+    
+    notifications[email].append(notification)
+    return notification
+
 
 @app.get("/")
 def root():
@@ -86,6 +112,28 @@ def root():
 @app.get("/activities")
 def get_activities():
     return activities
+
+
+@app.get("/notifications")
+def get_notifications(email: str):
+    """Get all notifications for a user"""
+    if email not in notifications:
+        return []
+    return notifications[email]
+
+
+@app.put("/notifications/{notification_id}/read")
+def mark_notification_read(notification_id: int, email: str):
+    """Mark a notification as read"""
+    if email not in notifications:
+        raise HTTPException(status_code=404, detail="No notifications found for user")
+    
+    for notification in notifications[email]:
+        if notification["id"] == notification_id:
+            notification["read"] = True
+            return {"message": "Notification marked as read"}
+    
+    raise HTTPException(status_code=404, detail="Notification not found")
 
 
 @app.post("/activities/{activity_name}/signup")
@@ -107,6 +155,14 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+    
+    # Create notification for the user
+    create_notification(
+        email,
+        f"You have successfully signed up for {activity_name}. Schedule: {activity['schedule']}",
+        "success"
+    )
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -129,4 +185,18 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
+    
+    # Create notification for the user
+    create_notification(
+        email,
+        f"You have been unregistered from {activity_name}",
+        "info"
+    )
+    
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
