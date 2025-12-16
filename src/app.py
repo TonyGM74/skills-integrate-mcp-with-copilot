@@ -3,6 +3,11 @@ High School Management System API
 
 A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
+
+Note: This is a demonstration application. In a production environment:
+- Admin endpoints should include authentication/authorization checks
+- User input should be sanitized to prevent XSS attacks
+- Data should be stored in a proper database with security measures
 """
 
 from fastapi import FastAPI, HTTPException
@@ -194,6 +199,8 @@ def update_activity(activity_name: str, description: str = None, schedule: str =
         activity["schedule"] = schedule
     
     if max_participants is not None:
+        if max_participants < 1:
+            raise HTTPException(status_code=400, detail="Max participants must be at least 1")
         if max_participants < len(activity["participants"]):
             raise HTTPException(
                 status_code=400, 

@@ -1,3 +1,7 @@
+// Admin Panel JavaScript
+// Note: In a production environment, user input should be properly sanitized
+// to prevent XSS attacks. This demo uses trusted data stored in memory.
+
 document.addEventListener("DOMContentLoaded", () => {
   const statisticsContent = document.getElementById("statistics-content");
   const adminActivitiesContainer = document.getElementById("admin-activities-container");
@@ -141,7 +145,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = document.getElementById("new-activity-name").value;
     const description = document.getElementById("new-activity-description").value;
     const schedule = document.getElementById("new-activity-schedule").value;
-    const maxParticipants = parseInt(document.getElementById("new-activity-capacity").value);
+    const maxParticipantsStr = document.getElementById("new-activity-capacity").value;
+    const maxParticipants = parseInt(maxParticipantsStr, 10);
+
+    // Validate capacity
+    if (isNaN(maxParticipants) || maxParticipants < 1) {
+      showMessage("Max participants must be a positive number", "error");
+      return;
+    }
 
     try {
       const response = await fetch(
