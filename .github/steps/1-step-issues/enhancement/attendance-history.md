@@ -33,3 +33,7 @@ This feature would help teachers:
 ## Expected Outcome
 
 Teachers can easily record and view attendance data for all extracurricular activities, making it simple to identify trends and support student success.
+
+----- COMMENTS -----
+This is exactly what we need! Taking attendance on paper is so outdated.
++1 Would love to see this integrated with the reporting feature too!
