@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Mergington High School</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Mergington High School</h1>
+      <h2>Admin Panel - Manage Activities</h2>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link">View Student Portal</a>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <!-- Create Activity Section -->
+      <section id="create-activity-container">
+        <h3>Create New Activity</h3>
+        <form id="create-activity-form">
+          <div class="form-group">
+            <label for="activity-name">Activity Name: *</label>
+            <input
+              type="text"
+              id="activity-name"
+              required
+              maxlength="100"
+              placeholder="e.g., Robotics Club"
+            />
+          </div>
+          <div class="form-group">
+            <label for="activity-description">Description: *</label>
+            <textarea
+              id="activity-description"
+              required
+              maxlength="500"
+              rows="3"
+              placeholder="Describe the activity..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="activity-schedule">Schedule: *</label>
+            <input
+              type="text"
+              id="activity-schedule"
+              required
+              maxlength="200"
+              placeholder="e.g., Mondays and Wednesdays, 3:30 PM - 5:00 PM"
+            />
+          </div>
+          <div class="form-group">
+            <label for="activity-max-participants">Max Participants: *</label>
+            <input
+              type="number"
+              id="activity-max-participants"
+              required
+              min="1"
+              max="100"
+              placeholder="e.g., 20"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Create Activity</button>
+        </form>
+        <div id="create-message" class="hidden"></div>
+      </section>
+
+      <!-- Manage Activities Section -->
+      <section id="manage-activities-container">
+        <h3>Manage Existing Activities</h3>
+        <div id="admin-activities-list">
+          <p>Loading activities...</p>
+        </div>
+      </section>
+
+      <!-- Edit Activity Modal -->
+      <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h3>Edit Activity</h3>
+          <form id="edit-activity-form">
+            <input type="hidden" id="edit-activity-name" />
+            <div class="form-group">
+              <label for="edit-activity-description">Description:</label>
+              <textarea
+                id="edit-activity-description"
+                maxlength="500"
+                rows="3"
+                placeholder="Leave empty to keep current value"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="edit-activity-schedule">Schedule:</label>
+              <input
+                type="text"
+                id="edit-activity-schedule"
+                maxlength="200"
+                placeholder="Leave empty to keep current value"
+              />
+            </div>
+            <div class="form-group">
+              <label for="edit-activity-max-participants">Max Participants:</label>
+              <input
+                type="number"
+                id="edit-activity-max-participants"
+                min="1"
+                max="100"
+                placeholder="Leave empty to keep current value"
+              />
+            </div>
+            <div class="modal-buttons">
+              <button type="submit" class="btn-primary">Save Changes</button>
+              <button type="button" class="btn-secondary" id="cancel-edit">Cancel</button>
+            </div>
+          </form>
+          <div id="edit-message" class="hidden"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2023 Mergington High School - Admin Panel</p>
+    </footer>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
