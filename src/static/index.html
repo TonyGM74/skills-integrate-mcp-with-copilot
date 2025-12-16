@@ -35,9 +35,56 @@
               <!-- Activity options will be loaded here -->
             </select>
           </div>
-          <button type="submit">Sign Up</button>
+          <button type="submit">Submit Request</button>
         </form>
         <div id="message" class="hidden"></div>
+      </section>
+
+      <section id="requests-container">
+        <h3>Membership Requests Management</h3>
+        <div class="form-group">
+          <label for="admin-activity">Select Activity to Manage:</label>
+          <select id="admin-activity">
+            <option value="">-- Select an activity --</option>
+            <!-- Activity options will be loaded here -->
+          </select>
+        </div>
+        <div id="requests-list">
+          <p><em>Select an activity to view requests</em></p>
+        </div>
+      </section>
+
+      <section id="roles-container">
+        <h3>Assign Roles to Members</h3>
+        <form id="role-form">
+          <div class="form-group">
+            <label for="role-activity">Select Activity:</label>
+            <select id="role-activity" required>
+              <option value="">-- Select an activity --</option>
+              <!-- Activity options will be loaded here -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="member-email">Member Email:</label>
+            <input type="email" id="member-email" required placeholder="member@mergington.edu" />
+          </div>
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" required>
+              <option value="">-- Select a role --</option>
+              <option value="president">President</option>
+              <option value="vice-president">Vice President</option>
+              <option value="secretary">Secretary</option>
+              <option value="treasurer">Treasurer</option>
+              <option value="captain">Captain</option>
+              <option value="vice-captain">Vice Captain</option>
+              <option value="director">Director</option>
+              <option value="member">Member</option>
+            </select>
+          </div>
+          <button type="submit">Assign Role</button>
+        </form>
+        <div id="role-message" class="hidden"></div>
       </section>
     </main>
 
