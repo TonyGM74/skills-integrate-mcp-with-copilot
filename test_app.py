@@ -1,18 +1,50 @@
 """
 Test cases for the student enrollment feature
 """
-import pytest
 from fastapi.testclient import TestClient
 from src.app import app, activities
+import pytest
 
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def reset_activities():
+    """Reset activities to initial state before each test"""
+    # Save initial state
+    initial_state = {
+        "Chess Club": {
+            "description": "Learn strategies and compete in chess tournaments",
+            "schedule": "Fridays, 3:30 PM - 5:00 PM",
+            "max_participants": 12,
+            "participants": ["michael@mergington.edu", "daniel@mergington.edu"]
+        },
+        "Programming Class": {
+            "description": "Learn programming fundamentals and build software projects",
+            "schedule": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
+            "max_participants": 20,
+            "participants": ["emma@mergington.edu", "sophia@mergington.edu"]
+        },
+        "Gym Class": {
+            "description": "Physical education and sports activities",
+            "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
+            "max_participants": 30,
+            "participants": ["john@mergington.edu", "olivia@mergington.edu"]
+        }
+    }
+    
+    # Reset to initial state before each test
+    activities.clear()
+    activities.update(initial_state)
+    
+    yield
+    
+    # Cleanup after test (if needed)
+    pass
+
+
 def test_signup_for_activity_success():
     """Test successful signup for an activity"""
-    # Reset the Chess Club participants to known state
-    activities["Chess Club"]["participants"] = ["michael@mergington.edu", "daniel@mergington.edu"]
-    
     response = client.post(
         "/activities/Chess Club/signup?email=newstudent@mergington.edu"
     )
@@ -36,9 +68,6 @@ def test_signup_for_nonexistent_activity():
 
 def test_signup_for_already_enrolled_student():
     """Test signup for a student who is already enrolled"""
-    # Ensure michael is in Chess Club
-    activities["Chess Club"]["participants"] = ["michael@mergington.edu", "daniel@mergington.edu"]
-    
     response = client.post(
         "/activities/Chess Club/signup?email=michael@mergington.edu"
     )
@@ -63,8 +92,8 @@ def test_get_activities():
 
 def test_unregister_from_activity_success():
     """Test successful unregistration from an activity"""
-    # Ensure student is in the activity
-    activities["Chess Club"]["participants"] = ["michael@mergington.edu", "daniel@mergington.edu", "test@mergington.edu"]
+    # Add a test student first
+    activities["Chess Club"]["participants"].append("test@mergington.edu")
     
     response = client.delete(
         "/activities/Chess Club/unregister?email=test@mergington.edu"
@@ -89,8 +118,6 @@ def test_unregister_from_nonexistent_activity():
 
 def test_unregister_student_not_enrolled():
     """Test unregistration for a student who is not enrolled"""
-    activities["Chess Club"]["participants"] = ["michael@mergington.edu", "daniel@mergington.edu"]
-    
     response = client.delete(
         "/activities/Chess Club/unregister?email=notinclub@mergington.edu"
     )
