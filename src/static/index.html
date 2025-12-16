@@ -13,6 +13,13 @@
     </header>
 
     <main>
+      <section id="notifications-container">
+        <h3>📢 Recent Notifications</h3>
+        <div id="notifications-list">
+          <p>Loading notifications...</p>
+        </div>
+      </section>
+
       <section id="activities-container">
         <h3>Available Activities</h3>
         <div id="activities-list">
@@ -38,6 +45,25 @@
           <button type="submit">Sign Up</button>
         </form>
         <div id="message" class="hidden"></div>
+      </section>
+
+      <section id="announcement-container">
+        <h3>Create Announcement</h3>
+        <form id="announcement-form">
+          <div class="form-group">
+            <label for="announcement-activity">Select Activity:</label>
+            <select id="announcement-activity" required>
+              <option value="">-- Select an activity --</option>
+              <!-- Activity options will be loaded here -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="announcement-message">Announcement Message:</label>
+            <textarea id="announcement-message" required placeholder="Enter your announcement here..." rows="3"></textarea>
+          </div>
+          <button type="submit">Post Announcement</button>
+        </form>
+        <div id="announcement-message-div" class="hidden"></div>
       </section>
     </main>
 

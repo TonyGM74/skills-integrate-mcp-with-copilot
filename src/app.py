@@ -8,6 +8,8 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from datetime import datetime
+from typing import Optional
 import os
 from pathlib import Path
 
@@ -77,6 +79,25 @@ activities = {
     }
 }
 
+# In-memory notifications database
+notifications = []
+notification_id_counter = 1
+
+
+def create_notification(activity_name: str, message: str, notification_type: str = "info"):
+    """Helper function to create a notification"""
+    global notification_id_counter
+    notification = {
+        "id": notification_id_counter,
+        "activity_name": activity_name,
+        "message": message,
+        "type": notification_type,
+        "timestamp": datetime.now().isoformat()
+    }
+    notifications.append(notification)
+    notification_id_counter += 1
+    return notification
+
 
 @app.get("/")
 def root():
@@ -86,6 +107,26 @@ def root():
 @app.get("/activities")
 def get_activities():
     return activities
+
+
+@app.get("/notifications")
+def get_notifications(activity_name: Optional[str] = None):
+    """Get all notifications or filter by activity name"""
+    if activity_name:
+        filtered = [n for n in notifications if n["activity_name"] == activity_name]
+        return filtered
+    return notifications
+
+
+@app.post("/notifications")
+def create_announcement(activity_name: str, message: str):
+    """Create a new announcement notification"""
+    # Validate activity exists
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    notification = create_notification(activity_name, message, "announcement")
+    return {"message": "Announcement created", "notification": notification}
 
 
 @app.post("/activities/{activity_name}/signup")
@@ -107,6 +148,14 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+    
+    # Create notification for signup
+    create_notification(
+        activity_name,
+        f"{email} joined {activity_name}",
+        "signup"
+    )
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -129,4 +178,12 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
+    
+    # Create notification for unregister
+    create_notification(
+        activity_name,
+        f"{email} left {activity_name}",
+        "unregister"
+    )
+    
     return {"message": f"Unregistered {email} from {activity_name}"}
