@@ -31,6 +31,7 @@ A super simple FastAPI application that allows students to view and sign up for 
 | ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GET    | `/activities`                                                     | Get all activities with their details and current participant count |
 | POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up for an activity                                             |
+| DELETE | `/activities/{activity_name}/unregister?email=student@mergington.edu` | Unregister from an activity                                      |
 
 ## Data Model
 
@@ -47,4 +48,15 @@ The application uses a simple data model with meaningful identifiers:
    - Name
    - Grade level
 
-All data is stored in memory, which means data will be reset when the server restarts.
+## In-Memory Storage
+
+**All activity and participant data is stored in-memory without any persistent database.**
+
+This means:
+- Data is stored in a Python dictionary during runtime
+- Changes (signups, unregistrations) are immediately reflected
+- All data is lost when the server restarts
+- No database setup or configuration is required
+- Perfect for development and demonstration purposes
+
+This design choice makes the application simple to run and maintain without the overhead of database management.
