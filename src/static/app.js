@@ -3,6 +3,85 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const notificationsList = document.getElementById("notifications-list");
+  const notificationEmailInput = document.getElementById("notification-email");
+  const loadNotificationsBtn = document.getElementById("load-notifications-btn");
+
+  // Function to fetch and display notifications
+  async function fetchNotifications() {
+    const email = notificationEmailInput.value.trim();
+    
+    if (!email) {
+      notificationsList.innerHTML = '<p class="notification-hint">Please enter your email to view notifications.</p>';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/notifications?email=${encodeURIComponent(email)}`);
+      const notifications = await response.json();
+
+      if (notifications.length === 0) {
+        notificationsList.innerHTML = '<p class="notification-hint">No notifications yet.</p>';
+        return;
+      }
+
+      // Sort notifications by timestamp (newest first)
+      notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      notificationsList.innerHTML = "";
+      
+      notifications.forEach(notification => {
+        const notificationCard = document.createElement("div");
+        notificationCard.className = `notification-card notification-${notification.type} ${notification.read ? 'notification-read' : ''}`;
+        
+        const timestamp = new Date(notification.timestamp).toLocaleString();
+        
+        notificationCard.innerHTML = `
+          <div class="notification-content">
+            <p class="notification-message">${notification.message}</p>
+            <p class="notification-timestamp">${timestamp}</p>
+          </div>
+          ${!notification.read ? `<button class="mark-read-btn" data-id="${notification.id}" data-email="${email}">Mark as Read</button>` : '<span class="read-badge">Read</span>'}
+        `;
+        
+        notificationsList.appendChild(notificationCard);
+      });
+
+      // Add event listeners to mark-as-read buttons
+      document.querySelectorAll(".mark-read-btn").forEach(button => {
+        button.addEventListener("click", handleMarkAsRead);
+      });
+    } catch (error) {
+      notificationsList.innerHTML = '<p class="notification-hint">Failed to load notifications. Please try again.</p>';
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+  // Handle mark notification as read
+  async function handleMarkAsRead(event) {
+    const button = event.target;
+    const notificationId = button.getAttribute("data-id");
+    const email = button.getAttribute("data-email");
+
+    try {
+      const response = await fetch(
+        `/notifications/${notificationId}/read?email=${encodeURIComponent(email)}`,
+        {
+          method: "PUT",
+        }
+      );
+
+      if (response.ok) {
+        // Refresh notifications list
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  }
+
+  // Load notifications button event listener
+  loadNotificationsBtn.addEventListener("click", fetchNotifications);
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -91,6 +170,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Refresh activities list to show updated participants
         fetchActivities();
+        
+        // Refresh notifications if email matches
+        const currentEmail = notificationEmailInput.value.trim();
+        if (currentEmail === email) {
+          fetchNotifications();
+        }
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -136,6 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Refresh activities list to show updated participants
         fetchActivities();
+        
+        // Refresh notifications if email matches
+        const currentEmail = notificationEmailInput.value.trim();
+        if (currentEmail === email) {
+          fetchNotifications();
+        }
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
