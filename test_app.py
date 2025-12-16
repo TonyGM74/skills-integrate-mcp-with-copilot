@@ -38,9 +38,6 @@ def reset_activities():
     activities.update(initial_state)
     
     yield
-    
-    # Cleanup after test (if needed)
-    pass
 
 
 def test_signup_for_activity_success():
