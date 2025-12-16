@@ -8,36 +8,29 @@ from src.app import app, activities
 import pytest
 
 
+def _reset_to_original_state(original_state):
+    """Helper function to reset activities to original state"""
+    for activity_name, activity_data in original_state.items():
+        if activity_name in activities:
+            activities[activity_name]["participants"] = activity_data["participants"].copy()
+
+
 @pytest.fixture(autouse=True)
 def reset_activities():
-    """Reset activities data before each test"""
-    # Store original state
+    """Reset activities data before and after each test"""
+    # Capture current state as original
     original = {
-        "Chess Club": {
-            "description": "Learn strategies and compete in chess tournaments",
-            "schedule": "Fridays, 3:30 PM - 5:00 PM",
-            "max_participants": 12,
-            "participants": ["michael@mergington.edu", "daniel@mergington.edu"]
-        },
-        "Programming Class": {
-            "description": "Learn programming fundamentals and build software projects",
-            "schedule": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
-            "max_participants": 20,
-            "participants": ["emma@mergington.edu", "sophia@mergington.edu"]
-        },
+        name: {"participants": data["participants"].copy()}
+        for name, data in activities.items()
     }
     
     # Reset to original state
-    for activity_name, activity_data in original.items():
-        if activity_name in activities:
-            activities[activity_name]["participants"] = activity_data["participants"].copy()
+    _reset_to_original_state(original)
     
     yield
     
     # Cleanup after test
-    for activity_name, activity_data in original.items():
-        if activity_name in activities:
-            activities[activity_name]["participants"] = activity_data["participants"].copy()
+    _reset_to_original_state(original)
 
 
 client = TestClient(app)
