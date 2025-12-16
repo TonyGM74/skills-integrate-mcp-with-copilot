@@ -8,8 +8,12 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
+from datetime import datetime
+from typing import List, Optional
 import os
 from pathlib import Path
+import uuid
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -77,6 +81,25 @@ activities = {
     }
 }
 
+# In-memory events database (events associated with clubs/activities)
+events = {}
+
+# In-memory notifications storage
+notifications = []
+
+
+class Event(BaseModel):
+    title: str
+    description: str
+    date: str
+    time: str
+    location: str
+    max_participants: int
+
+
+class NotificationRequest(BaseModel):
+    message: str
+
 
 @app.get("/")
 def root():
@@ -130,3 +153,165 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+@app.get("/clubs")
+def get_clubs():
+    """Get all clubs/activities that can have events"""
+    return {name: {"description": details["description"], "schedule": details["schedule"]} 
+            for name, details in activities.items()}
+
+
+@app.post("/clubs/{club_name}/events")
+def create_event(club_name: str, event: Event):
+    """Create a new event for a club"""
+    # Validate club exists
+    if club_name not in activities:
+        raise HTTPException(status_code=404, detail="Club not found")
+    
+    # Initialize events list for this club if it doesn't exist
+    if club_name not in events:
+        events[club_name] = {}
+    
+    # Generate unique event ID
+    event_id = str(uuid.uuid4())
+    
+    # Store the event
+    events[club_name][event_id] = {
+        "id": event_id,
+        "title": event.title,
+        "description": event.description,
+        "date": event.date,
+        "time": event.time,
+        "location": event.location,
+        "max_participants": event.max_participants,
+        "participants": [],
+        "created_at": datetime.now().isoformat()
+    }
+    
+    return {"message": f"Event '{event.title}' created successfully", "event_id": event_id}
+
+
+@app.get("/clubs/{club_name}/events")
+def get_club_events(club_name: str):
+    """Get all events for a specific club"""
+    # Validate club exists
+    if club_name not in activities:
+        raise HTTPException(status_code=404, detail="Club not found")
+    
+    # Return events for this club
+    return events.get(club_name, {})
+
+
+@app.post("/clubs/{club_name}/events/{event_id}/register")
+def register_for_event(club_name: str, event_id: str, email: str):
+    """Register a participant for an event"""
+    # Validate club exists
+    if club_name not in activities:
+        raise HTTPException(status_code=404, detail="Club not found")
+    
+    # Validate event exists
+    if club_name not in events or event_id not in events[club_name]:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    event = events[club_name][event_id]
+    
+    # Check if already registered
+    if email in event["participants"]:
+        raise HTTPException(status_code=400, detail="Already registered for this event")
+    
+    # Check if event is full
+    if len(event["participants"]) >= event["max_participants"]:
+        raise HTTPException(status_code=400, detail="Event is full")
+    
+    # Register participant
+    event["participants"].append(email)
+    
+    # Send automatic notification
+    notification = {
+        "id": str(uuid.uuid4()),
+        "event_id": event_id,
+        "club_name": club_name,
+        "recipient": email,
+        "message": f"You have successfully registered for '{event['title']}' on {event['date']} at {event['time']}",
+        "timestamp": datetime.now().isoformat()
+    }
+    notifications.append(notification)
+    
+    return {"message": f"Registered {email} for event '{event['title']}'", "notification": notification}
+
+
+@app.delete("/clubs/{club_name}/events/{event_id}/unregister")
+def unregister_from_event(club_name: str, event_id: str, email: str):
+    """Unregister a participant from an event"""
+    # Validate club exists
+    if club_name not in activities:
+        raise HTTPException(status_code=404, detail="Club not found")
+    
+    # Validate event exists
+    if club_name not in events or event_id not in events[club_name]:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    event = events[club_name][event_id]
+    
+    # Check if registered
+    if email not in event["participants"]:
+        raise HTTPException(status_code=400, detail="Not registered for this event")
+    
+    # Unregister participant
+    event["participants"].remove(email)
+    
+    # Send automatic notification
+    notification = {
+        "id": str(uuid.uuid4()),
+        "event_id": event_id,
+        "club_name": club_name,
+        "recipient": email,
+        "message": f"You have been unregistered from '{event['title']}'",
+        "timestamp": datetime.now().isoformat()
+    }
+    notifications.append(notification)
+    
+    return {"message": f"Unregistered {email} from event '{event['title']}'", "notification": notification}
+
+
+@app.post("/clubs/{club_name}/events/{event_id}/notify")
+def notify_participants(club_name: str, event_id: str, notification_request: NotificationRequest):
+    """Send notifications to all participants of an event"""
+    # Validate club exists
+    if club_name not in activities:
+        raise HTTPException(status_code=404, detail="Club not found")
+    
+    # Validate event exists
+    if club_name not in events or event_id not in events[club_name]:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    event = events[club_name][event_id]
+    
+    # Send notification to all participants
+    sent_notifications = []
+    for participant_email in event["participants"]:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "event_id": event_id,
+            "club_name": club_name,
+            "recipient": participant_email,
+            "message": notification_request.message,
+            "timestamp": datetime.now().isoformat()
+        }
+        notifications.append(notification)
+        sent_notifications.append(notification)
+    
+    return {
+        "message": f"Sent notifications to {len(sent_notifications)} participants",
+        "notifications": sent_notifications
+    }
+
+
+@app.get("/notifications")
+def get_notifications(email: Optional[str] = None):
+    """Get notifications, optionally filtered by email"""
+    if email:
+        return [n for n in notifications if n["recipient"] == email]
+    return notifications
+

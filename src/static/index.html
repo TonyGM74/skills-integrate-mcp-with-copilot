@@ -13,32 +13,104 @@
     </header>
 
     <main>
-      <section id="activities-container">
-        <h3>Available Activities</h3>
-        <div id="activities-list">
-          <!-- Activities will be loaded here -->
-          <p>Loading activities...</p>
-        </div>
-      </section>
+      <nav class="tabs">
+        <button class="tab-button active" data-tab="activities">Activities</button>
+        <button class="tab-button" data-tab="events">Club Events</button>
+      </nav>
 
-      <section id="signup-container">
-        <h3>Sign Up for an Activity</h3>
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="email">Student Email:</label>
-            <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+      <div id="activities-tab" class="tab-content active">
+        <section id="activities-container">
+          <h3>Available Activities</h3>
+          <div id="activities-list">
+            <!-- Activities will be loaded here -->
+            <p>Loading activities...</p>
           </div>
+        </section>
+
+        <section id="signup-container">
+          <h3>Sign Up for an Activity</h3>
+          <form id="signup-form">
+            <div class="form-group">
+              <label for="email">Student Email:</label>
+              <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+            </div>
+            <div class="form-group">
+              <label for="activity">Select Activity:</label>
+              <select id="activity" required>
+                <option value="">-- Select an activity --</option>
+                <!-- Activity options will be loaded here -->
+              </select>
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+          <div id="message" class="hidden"></div>
+        </section>
+      </div>
+
+      <div id="events-tab" class="tab-content">
+        <section id="event-create-container">
+          <h3>Create Club Event</h3>
+          <form id="event-form">
+            <div class="form-group">
+              <label for="event-club">Select Club:</label>
+              <select id="event-club" required>
+                <option value="">-- Select a club --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="event-title">Event Title:</label>
+              <input type="text" id="event-title" required placeholder="Tournament, Workshop, etc." />
+            </div>
+            <div class="form-group">
+              <label for="event-description">Description:</label>
+              <textarea id="event-description" required placeholder="Event details..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="event-date">Date:</label>
+              <input type="date" id="event-date" required />
+            </div>
+            <div class="form-group">
+              <label for="event-time">Time:</label>
+              <input type="time" id="event-time" required />
+            </div>
+            <div class="form-group">
+              <label for="event-location">Location:</label>
+              <input type="text" id="event-location" required placeholder="Room, building, etc." />
+            </div>
+            <div class="form-group">
+              <label for="event-max">Max Participants:</label>
+              <input type="number" id="event-max" required min="1" value="20" />
+            </div>
+            <button type="submit">Create Event</button>
+          </form>
+          <div id="event-message" class="hidden"></div>
+        </section>
+
+        <section id="events-list-container">
+          <h3>Club Events</h3>
           <div class="form-group">
-            <label for="activity">Select Activity:</label>
-            <select id="activity" required>
-              <option value="">-- Select an activity --</option>
-              <!-- Activity options will be loaded here -->
+            <label for="events-club-filter">Filter by Club:</label>
+            <select id="events-club-filter">
+              <option value="">-- All Clubs --</option>
             </select>
           </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div id="message" class="hidden"></div>
-      </section>
+          <div id="events-list">
+            <p>Select a club to view events or create one above.</p>
+          </div>
+        </section>
+
+        <section id="notifications-container">
+          <h3>My Notifications</h3>
+          <div class="form-group">
+            <label for="notification-email">Your Email:</label>
+            <input type="email" id="notification-email" placeholder="your-email@mergington.edu" />
+            <button id="view-notifications-btn">View My Notifications</button>
+          </div>
+          <div id="notifications-list">
+            <p>Enter your email and click the button to view notifications.</p>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer>
