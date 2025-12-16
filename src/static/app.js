@@ -1,8 +1,82 @@
 document.addEventListener("DOMContentLoaded", () => {
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
+  const announcementActivitySelect = document.getElementById("announcement-activity");
   const signupForm = document.getElementById("signup-form");
+  const announcementForm = document.getElementById("announcement-form");
   const messageDiv = document.getElementById("message");
+  const announcementMessageDiv = document.getElementById("announcement-message-div");
+  const notificationsList = document.getElementById("notifications-list");
+
+  // Function to fetch and display notifications
+  async function fetchNotifications() {
+    try {
+      const response = await fetch("/notifications");
+      const notifications = await response.json();
+
+      // Clear loading message
+      notificationsList.innerHTML = "";
+
+      if (notifications.length === 0) {
+        notificationsList.innerHTML = "<p><em>No notifications yet</em></p>";
+        return;
+      }
+
+      // Display latest 10 notifications
+      const recentNotifications = notifications.slice(-10).reverse();
+      
+      recentNotifications.forEach((notification) => {
+        const notificationCard = document.createElement("div");
+        notificationCard.className = `notification-card notification-${notification.type}`;
+        
+        const timestamp = new Date(notification.timestamp).toLocaleString();
+        const icon = getNotificationIcon(notification.type);
+        
+        // Create elements safely to prevent XSS
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'notification-icon';
+        iconSpan.textContent = icon;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'notification-content';
+        
+        const activityStrong = document.createElement('strong');
+        activityStrong.textContent = notification.activity_name;
+        
+        const messagePara = document.createElement('p');
+        messagePara.textContent = notification.message;
+        
+        const timestampSmall = document.createElement('small');
+        timestampSmall.textContent = timestamp;
+        
+        contentDiv.appendChild(activityStrong);
+        contentDiv.appendChild(messagePara);
+        contentDiv.appendChild(timestampSmall);
+        
+        notificationCard.appendChild(iconSpan);
+        notificationCard.appendChild(contentDiv);
+        
+        notificationsList.appendChild(notificationCard);
+      });
+    } catch (error) {
+      notificationsList.innerHTML = "<p>Failed to load notifications.</p>";
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+  // Get appropriate icon for notification type
+  function getNotificationIcon(type) {
+    switch (type) {
+      case "signup":
+        return "✅";
+      case "unregister":
+        return "👋";
+      case "announcement":
+        return "📢";
+      default:
+        return "ℹ️";
+    }
+  }
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -54,6 +128,12 @@ document.addEventListener("DOMContentLoaded", () => {
         option.value = name;
         option.textContent = name;
         activitySelect.appendChild(option);
+        
+        // Also add to announcement activity select
+        const announcementOption = document.createElement("option");
+        announcementOption.value = name;
+        announcementOption.textContent = name;
+        announcementActivitySelect.appendChild(announcementOption);
       });
 
       // Add event listeners to delete buttons
@@ -89,8 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
 
-        // Refresh activities list to show updated participants
+        // Refresh activities list and notifications
         fetchActivities();
+        fetchNotifications();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -134,8 +215,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.className = "success";
         signupForm.reset();
 
-        // Refresh activities list to show updated participants
+        // Refresh activities list and notifications
         fetchActivities();
+        fetchNotifications();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -155,6 +237,54 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Handle announcement form submission
+  announcementForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const activity = document.getElementById("announcement-activity").value;
+    const message = document.getElementById("announcement-message").value;
+
+    try {
+      const response = await fetch("/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          activity_name: activity,
+          message: message,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        announcementMessageDiv.textContent = result.message;
+        announcementMessageDiv.className = "success";
+        announcementForm.reset();
+
+        // Refresh notifications
+        fetchNotifications();
+      } else {
+        announcementMessageDiv.textContent = result.detail || "An error occurred";
+        announcementMessageDiv.className = "error";
+      }
+
+      announcementMessageDiv.classList.remove("hidden");
+
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        announcementMessageDiv.classList.add("hidden");
+      }, 5000);
+    } catch (error) {
+      announcementMessageDiv.textContent = "Failed to create announcement. Please try again.";
+      announcementMessageDiv.className = "error";
+      announcementMessageDiv.classList.remove("hidden");
+      console.error("Error creating announcement:", error);
+    }
+  });
+
   // Initialize app
   fetchActivities();
+  fetchNotifications();
 });

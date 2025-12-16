@@ -8,11 +8,19 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel
 import os
 from pathlib import Path
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
+
+# Pydantic models for request validation
+class AnnouncementRequest(BaseModel):
+    activity_name: str
+    message: str
 
 # Mount the static files directory
 current_dir = Path(__file__).parent
@@ -77,6 +85,31 @@ activities = {
     }
 }
 
+# In-memory notifications database
+notifications = []
+notification_id_counter = 1
+MAX_NOTIFICATIONS = 100  # Limit to prevent unbounded growth
+
+
+def create_notification(activity_name: str, message: str, notification_type: str = "info"):
+    """Helper function to create a notification"""
+    global notification_id_counter, notifications
+    notification = {
+        "id": notification_id_counter,
+        "activity_name": activity_name,
+        "message": message,
+        "type": notification_type,
+        "timestamp": datetime.now().isoformat()
+    }
+    notifications.append(notification)
+    notification_id_counter += 1
+    
+    # Keep only the latest MAX_NOTIFICATIONS to prevent memory issues
+    if len(notifications) > MAX_NOTIFICATIONS:
+        notifications = notifications[-MAX_NOTIFICATIONS:]
+    
+    return notification
+
 
 @app.get("/")
 def root():
@@ -86,6 +119,26 @@ def root():
 @app.get("/activities")
 def get_activities():
     return activities
+
+
+@app.get("/notifications")
+def get_notifications(activity_name: Optional[str] = None):
+    """Get all notifications or filter by activity name"""
+    if activity_name:
+        filtered = [n for n in notifications if n["activity_name"] == activity_name]
+        return filtered
+    return notifications
+
+
+@app.post("/notifications")
+def create_announcement(request: AnnouncementRequest):
+    """Create a new announcement notification"""
+    # Validate activity exists
+    if request.activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    notification = create_notification(request.activity_name, request.message, "announcement")
+    return {"message": "Announcement created", "notification": notification}
 
 
 @app.post("/activities/{activity_name}/signup")
@@ -107,6 +160,14 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+    
+    # Create notification for signup
+    create_notification(
+        activity_name,
+        f"{email} joined {activity_name}",
+        "signup"
+    )
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -129,4 +190,12 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
+    
+    # Create notification for unregister
+    create_notification(
+        activity_name,
+        f"{email} left {activity_name}",
+        "unregister"
+    )
+    
     return {"message": f"Unregistered {email} from {activity_name}"}

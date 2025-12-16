@@ -141,12 +141,14 @@ section h3 {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  font-family: Arial, sans-serif;
 }
 
 button {
@@ -198,3 +200,64 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+/* Notification styles */
+#notifications-container {
+  background-color: #e3f2fd;
+  border-left: 4px solid #1976d2;
+}
+
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 5px;
+  background-color: white;
+  border-left: 3px solid #ddd;
+  transition: transform 0.2s;
+}
+
+.notification-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification-signup {
+  border-left-color: #4caf50;
+}
+
+.notification-unregister {
+  border-left-color: #ff9800;
+}
+
+.notification-announcement {
+  border-left-color: #2196f3;
+}
+
+.notification-icon {
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex-grow: 1;
+}
+
+.notification-content strong {
+  display: block;
+  color: #1a237e;
+  margin-bottom: 4px;
+}
+
+.notification-content p {
+  margin: 4px 0;
+  color: #555;
+}
+
+.notification-content small {
+  color: #888;
+  font-size: 12px;
+}
+
